@@ -96,7 +96,7 @@ int main() {
           // https://discussions.udacity.com/t/mpc-car-space-conversion-and-output-of-solve-intuition/249469/12
           Eigen::VectorXd wayX(ptsx.size());
           Eigen::VectorXd wayY(ptsy.size());
-          for (int i = 0; i < ptsx.size(); i++)
+          for (unsigned int i = 0; i < ptsx.size(); i++)
           {
             double shift_x = ptsx[i] - px;
             double shift_y = ptsy[i] - py;
@@ -124,12 +124,14 @@ int main() {
           double steer_value = j[1]["steering_angle"];
           double throttle_value = j[1]["throttle"];
 
-          // take affect of latency
+          // taking affect of latency
           double latency = 0.1;
-          double x = v*cos(psi)*latency;
-          double y = v*sin(psi)*latency;
-          psi = psi + v*steer_value/2.67*latency;
+          double x = v*latency;//v*cos(psi)*latency;
+          double y = 0;
+          psi =  -1*v*steer_value/2.67*latency;
           v = v + throttle_value*latency;
+          cte = polyeval(coeffs, x);
+          epsi =  psi-atan(coeffs[1] + 2 * x * coeffs[2] + 3 * coeffs[3] * pow(x, 2));
 
           Eigen::VectorXd state(6);
           //state << 0, 0, 0, v, cte, epsi;
@@ -141,7 +143,7 @@ int main() {
           vector<double> mpc_y_vals;
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
-          for (int i = 2; i < vars.size(); i++)
+          for (unsigned int i = 2; i < vars.size(); i++)
           {
             if (i%2 == 0)
             {

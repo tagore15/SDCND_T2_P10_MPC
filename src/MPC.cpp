@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 10;
-double dt = 0.5;
+int N = 10;
+double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -21,20 +21,20 @@ double dt = 0.5;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-// requiremed values of CTE/epsi and velocity
+// required values of CTE/epsi and velocity
 double ref_cte = 0;
 double ref_epsi = 0;
 double ref_v = 100;
 
 // This is starting position for each set of variable used in optimization  
-size_t x_start = 0;             // x coordinate
-size_t y_start = x_start + N;   // y coordinate
-size_t psi_start = y_start + N; // psi values
-size_t v_start = psi_start + N; // velocity
-size_t cte_start = v_start + N; // croos talk error
-size_t epsi_start = cte_start + N;     // error in psi
-size_t delta_start = epsi_start + N;   // control - steering 
-size_t a_start = delta_start + N - 1;  // control - acceleration
+int x_start = 0;             // x coordinate
+int y_start = x_start + N;   // y coordinate
+int psi_start = y_start + N; // psi values
+int v_start = psi_start + N; // velocity
+int cte_start = v_start + N; // croos talk error
+int epsi_start = cte_start + N;     // error in psi
+int delta_start = epsi_start + N;   // control - steering 
+int a_start = delta_start + N - 1;  // control - acceleration
 
 class FG_eval {
  public:
@@ -50,16 +50,15 @@ class FG_eval {
     // the Solver function below.
     
     // 0 index of fg is cost function that we want to minimize 
-    // weights are taken same as in project QnA videos
     fg[0] = 0;
     for (int i = 0; i < N; i++)
     {
         // CTE error should be close to zero
-        fg[0] += 5000*CppAD::pow(vars[cte_start+i] - ref_cte, 2);
+        fg[0] += 10000*CppAD::pow(vars[cte_start+i] - ref_cte, 2);
         // error in psi should be close to zero
-        fg[0] += 2000*CppAD::pow(vars[epsi_start+i] - ref_epsi, 2);
+        fg[0] += 5000*CppAD::pow(vars[epsi_start+i] - ref_epsi, 2);
         // velocity should be deviate much from specified velocity
-        fg[0] += CppAD::pow(vars[v_start+i] - ref_v, 2);
+        fg[0] += 5*CppAD::pow(vars[v_start+i] - ref_v, 2);
     }
     for (int i = 0; i < N-1; i++)
     {
@@ -85,7 +84,7 @@ class FG_eval {
     fg[1 + epsi_start] = vars[epsi_start];
 
     for (int i = 0; i < N - 1; i++)
-    { // constraint on difference between expected and model postion
+    { // constraints on difference between expected and model postions
 
         // next state (t+1)
         AD<double> x1 = vars[x_start + i + 1];
@@ -132,7 +131,6 @@ MPC::~MPC() {}
 
 vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   bool ok = true;
-  size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = state[0];
@@ -147,9 +145,9 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // element vector and there are 10 timesteps. The number of variables is:
   //
   // 4 * 10 + 2 * 9
-  size_t n_vars = N*6 + (N-1)*2;
+  int n_vars = N*6 + (N-1)*2;
   // TODO: Set the number of constraints
-  size_t n_constraints = N*6;
+  int n_constraints = N*6;
 
   // Initial value of the independent variables.
   // SHOULD BE 0 besides initial state.
@@ -241,13 +239,14 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
   // creates a 2 element double vector.
   vector<double> result;
-  result.push_back(solution.x[delta_start]);
-  result.push_back(solution.x[a_start]);
+  result.push_back(solution.x[delta_start]);  // push steering value
+  result.push_back(solution.x[a_start]);      // push acceleration value
 
-  for (int i = 0; i < N-1; i++)
+  for (int i = 0; i < N; i++)
   {
-    result.push_back(solution.x[x_start + i + 1]);
-    result.push_back(solution.x[y_start + i + 1]);
+    // push waypoints calculated by car kinematic model
+    result.push_back(solution.x[x_start + i]);
+    result.push_back(solution.x[y_start + i]);
   }
 
   return result;
