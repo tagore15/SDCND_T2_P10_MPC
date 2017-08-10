@@ -6,13 +6,12 @@ Our state consists of following 6 variables for each waypoints as:-
 ```
 (x(t), y(t), psi(t), v(t), cte(t), epsi(t))
 ```
-Here    
-x(t) - x coordinate at time t
-y(t) - y coordinate at time t
-psi(t) - Angle with reference to x-axis at time t
-v(t)   - velocity at time t
-cte(t) - cross-talk error at time t
-epsi(t) - error in psi at time t
+x(t) - x coordinate at time t     
+y(t) - y coordinate at time t     
+psi(t) - Angle with reference to x-axis at time t     
+v(t)   - velocity at time t     
+cte(t) - cross-talk error at time t     
+epsi(t) - error in psi at time t     
 
 Our control (actuator) variables are:-     
 steer(t) - steering applied at time t   
@@ -49,7 +48,8 @@ I shift the coordinate systems with respect to car as per below equations with c
 wayX = (shift_x*cos(psi) + shift_y*sin(psi));
 wayY = (shift_y*cos(psi) - shift_x*sin(psi));
 ```
-Here shift_x and shift_y corresponds to difference between point and car's global x and y coodinates.       
+Here shift_x and shift_y corresponds to difference between point and car's global x and y coodinates.      
+
 Below diagram discussed in Udacity forums illustrate calculation behind above equation nicely    
 ![coordinate translation image][image1]
 
